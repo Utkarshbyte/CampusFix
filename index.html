@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CampusFix | Report and track campus issues</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ 
+  <header class="topbar">
+    <a class="brand" href="#report" aria-label="CampusFix home">
+      <span class="brand-mark" aria-hidden="true"></span>CampusFix
+    </a>
+    <nav class="tabs" aria-label="Main">
+      <button class="tab is-active" data-view="report">Report an issue</button>
+      <button class="tab" data-view="issues">Live issues</button>
+      <button class="tab" data-view="dashboard">Staff dashboard</button>
+    </nav>
+  </header>
+ 
+  <main>
+ 
+    <!-- ============ VIEW 1: REPORT ============ -->
+    <section id="view-report" class="view is-active" aria-label="Report an issue">
+      <div class="report-grid">
+ 
+        <div class="intro">
+          <h1>Something Broken?<br>Tell us once.</h1>
+          <p class="lead">Snap a photo, describe the problem in Hindi or English, and CampusFix sends it to the right team with the right urgency.</p>
+ 
+          <ol class="steps">
+            <li><strong>You report</strong><span>Photo, a few words, and where it is.</span></li>
+            <li><strong>AI sorts it</strong><span>Category, severity and safety risk, in seconds.</span></li>
+            <li><strong>Staff fix it</strong><span>The right department gets it, most urgent first.</span></li>
+            <li><strong>You confirm</strong><span>A ticket only closes after you say it is fixed.</span></li>
+          </ol>
+        </div>
+ 
+        <div class="panel-wrap">
+          <!-- the form -->
+          <form id="report-form" class="panel" novalidate>
+            <h2>New report</h2>
+ 
+            <label class="field">
+              <span class="field-label">Photo</span>
+              <div class="drop" id="drop">
+                <input type="file" id="photo" accept="image/*" capture="environment">
+                <div class="drop-empty" id="drop-empty">
+                  <strong>Add a photo</strong>
+                  <span>Tap to take or choose one</span>
+                </div>
+                <img id="photo-preview" alt="Preview of your photo" hidden>
+              </div>
+            </label>
+ 
+            <div class="field">
+              <div class="field-row">
+                <label class="field-label" for="description">What is wrong?</label>
+                <div class="voice" id="voice-wrap">
+                  <select id="voice-lang" aria-label="Voice language">
+                    <option value="hi-IN">Hindi</option>
+                    <option value="en-IN">English</option>
+                  </select>
+                  <button type="button" class="btn-ghost" id="voice-btn">Speak</button>
+                </div>
+              </div>
+              <textarea id="description" rows="4" placeholder="Example: Water is leaking from the ceiling near the staircase and the floor is slippery."></textarea>
+            </div>
+ 
+            <div class="two">
+              <label class="field">
+                <span class="field-label">Where?</span>
+                <select id="location"></select>
+              </label>
+              <label class="field">
+                <span class="field-label">Room or spot (optional)</span>
+                <input type="text" id="room" placeholder="Room 204, 2nd floor">
+              </label>
+            </div>
+ 
+            <p class="form-error" id="form-error" role="alert" aria-live="polite"></p>
+            <button type="submit" class="btn-primary" id="submit-btn">Send report</button>
+          </form>
+ 
+          <!-- the result (shown after submit) -->
+          <div id="result" class="panel result" hidden aria-live="polite"></div>
+        </div>
+ 
+      </div>
+    </section>
+ 
+    <!-- ============ VIEW 2: LIVE ISSUES ============ -->
+    <section id="view-issues" class="view" aria-label="Live issues">
+      <div class="toolbar">
+        <h2>Live issues</h2>
+        <div class="filters">
+          <select id="filter-status" aria-label="Filter by status">
+            <option value="open">All open</option>
+            <option value="all">Everything</option>
+            <option>Reported</option>
+            <option>Assigned</option>
+            <option>In progress</option>
+            <option>Resolved</option>
+          </select>
+          <select id="filter-category" aria-label="Filter by category"></select>
+        </div>
+      </div>
+      <div class="issues-grid">
+        <div class="ticket-list" id="ticket-list"></div>
+        <div class="map-wrap"><div id="map" role="region" aria-label="Map of reported issues"></div></div>
+      </div>
+    </section>
+ 
+    <!-- ============ VIEW 3: DASHBOARD ============ -->
+    <section id="view-dashboard" class="view" aria-label="Staff dashboard">
+      <div class="toolbar"><h2>Staff dashboard</h2></div>
+ 
+      <div class="stats" id="stats"></div>
+ 
+      <div class="dash-grid">
+        <div class="panel">
+          <h3>Open issues by category</h3>
+          <div id="bars"></div>
+        </div>
+        <div class="panel">
+          <h3>Repeat problem spots</h3>
+          <p class="muted small">Places where the same kind of issue keeps coming back. Replacing may beat repairing.</p>
+          <div id="hotspots"></div>
+        </div>
+      </div>
+ 
+      <div class="panel queue">
+        <h3>Work queue, most urgent first</h3>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Priority</th><th>Issue</th><th>Location</th><th>Team</th><th>Reports</th><th>Status</th></tr>
+            </thead>
+            <tbody id="queue-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+ 
+  </main>
+ 
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+ 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+ 
