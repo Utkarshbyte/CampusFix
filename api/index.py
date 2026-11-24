@@ -23,8 +23,8 @@ try:
 except Exception:
     from telegram_notifier import send_telegram_alert
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8690550042:AAE4m452pnJyp81mjxICg37gHJfAjFrvJjs")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "2124265006")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "yourtelegrambottoken")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "yourtelegramchatid")
 
 # ==========================================
 # Configuration & Setup
